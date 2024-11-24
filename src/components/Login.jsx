@@ -20,8 +20,7 @@ const Login = () => {
         </p>
 
         <div className="text-center mb-6">
-          <h3 className="text-xl font-semibold text-gray-800">Company Logo</h3>
-          <p className="text-sm text-gray-500">Centered Company Logo</p>
+          <img src="/logo.png" alt="logo" className="w-32 flex mx-auto"/>
         </div>
 
         <form className="space-y-4">

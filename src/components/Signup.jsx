@@ -20,10 +20,7 @@ const Signup = () => {
       <div className="w-full max-w-md md:bg-white md:shadow-md rounded-lg p-6">
         {/* Header Section */}
         <div className="flex items-center space-x-2 mb-6">
-          <div className="text-2xl font-bold text-gray-900">➕</div>
-          <h1 className="text-xl font-semibold text-gray-900">
-            Hospital Signup
-          </h1>
+          <img src="/logo.png" alt="logo" className="w-32 flex mx-auto"/>
         </div>
 
         {/* Title and Subtitle */}
