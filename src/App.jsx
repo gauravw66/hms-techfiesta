@@ -8,82 +8,14 @@ import MedicalHistoryForm2 from './components/MedicalHistoryForm2';
 import UploadDocuments from './components/UploadDocuments';
 import UserDashboard from './components/UserDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import TempNavbar from './components/TempNavbar';
 
 function App() {
-  const [isOpen, setIsOpen] = useState(false);
+  
 
   return (
     <Router>
-      {/* Main Navbar */}
-      <nav className="bg-gray-800 p-4 sticky top-0 z-10 shadow-md">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="text-white text-xl font-bold">Dev_nav_bar(del after developmet)</div>
-          <button
-            className="text-white md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            ☰
-          </button>
-          <div className={`md:flex md:space-x-4 ${isOpen ? 'block' : 'hidden'} md:block`}>
-            <Link
-              to="/"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Signup
-            </Link>
-            <Link
-              to="/personal-info"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Personal Info
-            </Link>
-            <Link
-              to="/medical-history"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Medical History
-            </Link>
-            <Link
-              to="/medical-history-2"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Medical History 2
-            </Link>
-            <Link
-              to="/upload-documents"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Upload Documents
-            </Link>
-            <Link
-              to="/user-dashboard"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              User Dashboard
-            </Link>
-            <Link
-              to="/admin-dashboard"
-              className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
-              onClick={() => setIsOpen(false)}
-            >
-              Admin Dashboard
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <TempNavbar />
 
       {/* Main Content */}
       <Routes>
