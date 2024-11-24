@@ -62,7 +62,7 @@ const MedicalHistoryForm = () => {
 
               {/* Height */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900">Height</label>
+                <label className="block text-sm font-medium text-gray-900">Height (in cm)</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -77,7 +77,7 @@ const MedicalHistoryForm = () => {
 
               {/* Weight */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-900">Weight</label>
+                <label className="block text-sm font-medium text-gray-900">Weight (in kg)</label>
                 <div className="relative">
                   <input
                     type="number"

@@ -90,7 +90,7 @@ const PersonalInfoForm = () => {
 
               {/* Aadhar Card Number */}
               <div className="space-y-1">
-                <label className="text-sm font-medium text-gray-900">Aadhar Card Number</label>
+                <label className="text-sm font-medium text-gray-900">Aadhar Card Number (without spaces)</label>
                 <input
                   type="text"
                   placeholder="Enter your Aadhar Card number"
