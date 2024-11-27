@@ -1,9 +1,49 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
+import {
+  doSignInWithEmailAndPassword,
+  doSignInWithGoogle,
+} from "../firebase/auth";
+import { useAuth } from "../context/authContext";
+import { Navigate } from "react-router-dom";
 
 const Login = () => {
+  const { userLoggedIn } = useAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [error, setError] = useState("");
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    if (!isSigningIn) {
+      setIsSigningIn(true);
+      try {
+        await doSignInWithEmailAndPassword(email, password);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsSigningIn(false);
+      }
+    }
+  };
+
+  const onGoogleSignIn = async (e) => {
+    e.preventDefault();
+    if (!isSigningIn) {
+      setIsSigningIn(true);
+      try {
+        await doSignInWithGoogle();
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setIsSigningIn(false);
+      }
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -11,6 +51,7 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 md:px-4 md:p-2">
+      {userLoggedIn && <Navigate to="/user-dashboard" replace={true} />}
       <div className="w-full max-w-md md:bg-white md:shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold text-center text-gray-900">
           Welcome Back!
@@ -20,10 +61,12 @@ const Login = () => {
         </p>
 
         <div className="text-center mb-6">
-          <img src="/logo.png" alt="logo" className="w-32 flex mx-auto"/>
+          <img src="/logo.png" alt="logo" className="w-32 flex mx-auto" />
         </div>
 
-        <form className="space-y-4">
+        {error && <p className="text-red-600 text-sm text-center mt-2">{error}</p>}
+
+        <form className="space-y-4" onSubmit={onSubmit}>
           <div>
             <label
               htmlFor="email"
@@ -36,6 +79,8 @@ const Login = () => {
               id="email"
               className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -52,6 +97,8 @@ const Login = () => {
                 id="password"
                 className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -71,27 +118,17 @@ const Login = () => {
               Forgot Password?
             </a>
           </div>
-          {/* 
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-            />
-            <label
-              htmlFor="remember-me"
-              className="ml-2 block text-sm text-gray-900"
-            >
-              Remember Me
-            </label>
-          </div> */}
 
           <button
             type="submit"
-            className="w-full px-4 py-2 bg-green-600 text-white font-medium text-sm rounded-md hover:bg-green-500 focus:outline-none focus:ring-2 focus:ring-green-500"
+            disabled={isSigningIn}
+            className={`w-full px-4 py-2 ${
+              isSigningIn
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-500"
+            } text-white font-medium text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-green-500`}
           >
-            Login
+            {isSigningIn ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -103,10 +140,10 @@ const Login = () => {
 
         <button
           type="button"
+          onClick={onGoogleSignIn}
           className="w-full px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium text-sm rounded-md shadow-sm flex items-center justify-center space-x-2 hover:bg-gray-50"
         >
           <FcGoogle alt="Google" className="w-5 h-5" />
-
           <span>Login with Google</span>
         </button>
 

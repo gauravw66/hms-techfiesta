@@ -1,8 +1,28 @@
 import React, { useState } from "react";
-import { IoIosDocument } from "react-icons/io";
+import { useAuth } from "../context/authContext"; // Adjust the path as per your directory structure
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase/firebase";
+import { Navigate } from "react-router-dom";
 
 const UserDashboard = () => {
+  const { currentUser, userLoggedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [redirectToLogin, setRedirectToLogin] = useState(false);
+
+  // Logout handler
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("Successfully logged out");
+      setRedirectToLogin(true); // Trigger the redirect
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+    }
+  };
+
+  if (redirectToLogin) {
+    return <Navigate to="/" />; // Redirect to the login page
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 md:px-8 lg:px-16 py-6">
@@ -69,12 +89,12 @@ const UserDashboard = () => {
                   </a>
                 </li>
                 <li>
-                  <a
-                    href="#logout"
-                    className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Logout
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>
@@ -83,89 +103,48 @@ const UserDashboard = () => {
       </header>
 
       {/* Profile Section */}
-      <section className="text-center mb-8">
-        <img
-          className="w-24 h-24 rounded-full mx-auto mb-4"
-          src="https://via.placeholder.com/150"
-          alt="User"
-        />
-        <h2 className="text-lg font-semibold text-gray-800">John Doe</h2>
-        <p className="text-sm text-gray-500">@johndoe</p>
-      </section>
+      {userLoggedIn && currentUser ? (
+        <>
+          <section className="text-center mb-8">
+            <img
+              className="w-24 h-24 rounded-full mx-auto mb-4"
+              src={currentUser.photoURL || "https://via.placeholder.com/150"}
+              alt={currentUser.displayName || "User"}
+            />
+            <h2 className="text-lg font-semibold text-gray-800">
+              {currentUser.displayName || "User Name"}
+            </h2>
+            <p className="text-sm text-gray-500">{currentUser.email}</p>
+          </section>
 
-      {/* Personal Information */}
-      <section className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Personal Information
-        </h3>
-        <div className="bg-white shadow-md rounded-lg p-6 space-y-4">
-          {[ 
-            { label: "Name", value: "John Doe" },
-            { label: "Age", value: "34" },
-            { label: "Sex", value: "Male" },
-            { label: "Unique ID", value: "ID-123456" },
-            { label: "Email", value: "john.doe@example.com" },
-            { label: "Phone Number", value: "+91 1234567890" },
-            { label: "Address", value: "123 Main Street" },
-          ].map((info, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between border-b last:border-b-0 pb-3 last:pb-0"
-            >
-              <span className="text-gray-500 font-medium">{info.label}</span>
-              <span className="text-gray-800 font-semibold">{info.value}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Uploaded Documents */}
-      <section className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Uploaded Documents
-        </h3>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            { title: "Blood Pressure Report", date: "2023-01-15" },
-            { title: "Diabetes Report", date: "2023-02-10" },
-            { title: "Lab Report", date: "2023-03-20" },
-          ].map((doc, index) => (
-            <div
-              key={index}
-              className="flex items-center p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-            >
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mr-4">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+          {/* Personal Information */}
+          <section className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Personal Information
+            </h3>
+            <div className="bg-white shadow-md rounded-lg p-6 space-y-4">
+              {[{ label: "Name", value: currentUser.displayName || "John Doe" },
+                { label: "Email", value: currentUser.email },
+                { label: "Unique ID", value: currentUser.uid },
+              ].map((info, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between border-b last:border-b-0 pb-3 last:pb-0"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h10z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">{doc.title}</p>
-                <p className="text-sm text-gray-500">Upload Date: {doc.date}</p>
-              </div>
-              {/* <button className="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-md p-2">
-              <IoIosDocument />
-              </button> */}
+                  <span className="text-gray-500 font-medium">
+                    {info.label}
+                  </span>
+                  <span className="text-gray-800 font-semibold">
+                    {info.value}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="mt-4 text-center">
-          <a href="#" className="text-sm text-blue-500 hover:underline">
-            Contact Support
-          </a>
-        </div>
-      </section>
+          </section>
+        </>
+      ) : (
+        <p className="text-center text-gray-600">Please log in to view details.</p>
+      )}
     </div>
   );
 };
