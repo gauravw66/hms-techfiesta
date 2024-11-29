@@ -1,231 +1,189 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Oval } from "react-loader-spinner";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const UploadDocuments = () => {
-  // Separate state for each document type
-  const [imagingFile, setImagingFile] = useState(null);
-  const [labFile, setLabFile] = useState(null);
-  const [surgeryFile, setSurgeryFile] = useState(null);
-  const [medicationFile, setMedicationFile] = useState(null);
+  const [files, setFiles] = useState({
+    imaging: [],
+    lab: [],
+    surgery: [],
+    medication: [],
+  });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB in bytes
+  const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
+  const MAX_FILES_PER_SECTION = 5;
 
-  // Handle file change for different document types
-  const handleFileChange = (e, setFileFunction) => {
-    const selectedFile = e.target.files[0];
+  const showErrorToast = (message) => {
+    console.error(message);
+    toast.error(message, {
+      position: "top-center",
+      autoClose: 3000,
+    });
+  };
 
-    if (selectedFile) {
-      // Check if the file is a PDF and its size is within the limit
-      if (selectedFile.type !== "application/pdf") {
-        setMessage("Only PDF files are allowed.");
-        return;
-      }
+  const showSuccessToast = (message) => {
+    console.log(message);
+    toast.success(message, {
+      position: "top-center",
+      autoClose: 3000,
+    });
+  };
 
-      if (selectedFile.size > MAX_FILE_SIZE) {
-        setMessage("File size should not exceed 3MB.");
-        return;
-      }
+  const handleFileChange = (e, section) => {
+    const selectedFiles = Array.from(e.target.files);
+    const existingFiles = files[section];
 
-      setFileFunction(selectedFile);
-      setMessage(""); // Clear any previous messages
+    if (existingFiles.length + selectedFiles.length > MAX_FILES_PER_SECTION) {
+      const errorMessage = `You can upload up to ${MAX_FILES_PER_SECTION} files per section.`;
+      showErrorToast(errorMessage);
+      return;
     }
-  };
 
-  // Handle drag over event
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  // Handle file drop event
-  const handleDrop = (e, setFileFunction) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const droppedFile = e.dataTransfer.files[0];
-
-    if (droppedFile) {
-      // Check if the dropped file is a PDF and its size is within the limit
-      if (droppedFile.type !== "application/pdf") {
-        setMessage("Only PDF files are allowed.");
-        return;
+    const validFiles = selectedFiles.filter((file) => {
+      if (file.type !== "application/pdf") {
+        showErrorToast("Only PDF files are allowed.");
+        return false;
       }
-
-      if (droppedFile.size > MAX_FILE_SIZE) {
-        setMessage("File size should not exceed 3MB.");
-        return;
+      if (file.size > MAX_FILE_SIZE) {
+        showErrorToast("File size should not exceed 3MB.");
+        return false;
       }
+      return true;
+    });
 
-      setFileFunction(droppedFile);
-      setMessage(""); // Clear any previous messages
-    }
+    setFiles((prev) => ({
+      ...prev,
+      [section]: [...prev[section], ...validFiles],
+    }));
   };
 
-  // Handle file delete for different document types
-  const handleDeleteFile = (setFileFunction) => {
-    setFileFunction(null); // Reset the file state
+  const handleDeleteFile = (section, index) => {
+    setFiles((prev) => ({
+      ...prev,
+      [section]: prev[section].filter((_, i) => i !== index),
+    }));
+    showSuccessToast("File removed successfully.");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if at least one file has been uploaded
-    if (!imagingFile && !labFile && !surgeryFile && !medicationFile) {
-      setMessage("Please upload at least one document.");
+    const hasFiles = Object.values(files).some((section) => section.length > 0);
+    if (!hasFiles) {
+      const errorMessage = "Please upload at least one document.";
+      showErrorToast(errorMessage);
       return;
     }
 
     setLoading(true);
-    setMessage("");
 
     const formData = new FormData();
-    if (imagingFile) formData.append("imaging", imagingFile);
-    if (labFile) formData.append("lab", labFile);
-    if (surgeryFile) formData.append("surgery", surgeryFile);
-    if (medicationFile) formData.append("medication", medicationFile);
+    Object.entries(files).forEach(([section, sectionFiles]) => {
+      sectionFiles.forEach((file, index) => {
+        formData.append(`${section}[${index}]`, file);
+      });
+    });
 
     try {
-      const response = await axios.post(
-        "http://localhost:5000/upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      setLoading(false);
-      setMessage("Files uploaded successfully!");
+      const response = await axios.post("http://localhost:5000/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      showSuccessToast("Files uploaded successfully!");
+      setFiles({ imaging: [], lab: [], surgery: [], medication: [] });
     } catch (error) {
+      const errorMessage = `Error uploading files: ${error.message}`;
+      showErrorToast(errorMessage);
+    } finally {
       setLoading(false);
-      setMessage("Error uploading files.");
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center md:px-8 lg:px-16 ">
-      <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-md border-b border-gray-200">
-        <div className="border-b border-gray-200 mb-6">
-          <h1 className="pb-4 text-2xl font-semibold text-gray-900 ">
-            Upload Documents
-          </h1>
-        </div>
+  const sections = [
+    { title: "Imaging Documents", key: "imaging" },
+    { title: "Lab Reports", key: "lab" },
+    { title: "Surgery History", key: "surgery" },
+    { title: "Medication History", key: "medication" },
+  ];
 
-        {/* Upload Sections */}
-        {[
-          {
-            title: "Imaging Documents",
-            file: imagingFile,
-            setFileFunction: setImagingFile,
-          },
-          { title: "Lab Reports", file: labFile, setFileFunction: setLabFile },
-          {
-            title: "Surgery History",
-            file: surgeryFile,
-            setFileFunction: setSurgeryFile,
-          },
-          {
-            title: "Medication History",
-            file: medicationFile,
-            setFileFunction: setMedicationFile,
-          },
-        ].map((section, index) => (
-          <div key={index} className="mb-6">
-            <p className="text-sm font-medium text-gray-800 mb-2">
-              Upload {section.title}
-            </p>
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <ToastContainer />
+      <motion.div
+        className="max-w-xl w-full bg-white p-6 rounded-lg shadow-lg"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+      >
+        <h1 className="text-xl font-bold text-gray-800 mb-4 text-center">Upload Documents</h1>
+
+        {sections.map((section) => (
+          <motion.div
+            key={section.key}
+            className="mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <p className="font-medium text-gray-700">{section.title}</p>
             <div
-              className="flex items-center justify-center p-6 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-300"
-              onClick={() =>
-                document.getElementById(`file-input-${index}`).click()
-              }
-              onDragOver={(e) => handleDragOver(e)}
-              onDrop={(e) => handleDrop(e, section.setFileFunction)}
+              className="border-2 border-dashed border-gray-300 rounded-lg p-4 mt-2 transition hover:bg-gray-100 cursor-pointer"
             >
               <input
-                id={`file-input-${index}`}
                 type="file"
                 accept=".pdf"
-                onChange={(e) => handleFileChange(e, section.setFileFunction)}
+                multiple
+                onChange={(e) => handleFileChange(e, section.key)}
                 className="hidden"
+                id={`file-input-${section.key}`}
               />
-              {section.file ? (
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-600 text-sm">
-                    {section.file.name}
-                  </span>
-                  <button
-                    type="button"
-                    className="text-red-500 text-sm"
-                    onClick={() => handleDeleteFile(section.setFileFunction)}
-                  >
-                    Delete
-                  </button>
+              <label
+                htmlFor={`file-input-${section.key}`}
+                className="text-sm text-gray-500 cursor-pointer"
+              >
+                Drag and drop files or click to upload (Max {MAX_FILES_PER_SECTION})
+              </label>
+              <AnimatePresence>
+                <div className="mt-2 space-y-2">
+                  {files[section.key].map((file, index) => (
+                    <motion.div
+                      key={file.name}
+                      className="flex items-center justify-between text-sm bg-gray-100 p-2 rounded-lg"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                    >
+                      <span>{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteFile(section.key, index)}
+                        className="text-red-600 hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </motion.div>
+                  ))}
                 </div>
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 15a4 4 0 004 4h10a4 4 0 004-4V7a4 4 0 00-4-4H7a4 4 0 00-4 4v8z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 10l-4 4m0 0l-4-4m4 4V4"
-                    />
-                  </svg>
-                  <p className="text-gray-500 text-sm mt-2">
-                    Drag and drop or click to select a file
-                  </p>
-                </>
-              )}
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         ))}
 
-        {/* Submit Button */}
-        <button
+        <motion.button
           onClick={handleSubmit}
-          className="w-full h-12 text-white bg-green-500 hover:bg-green-600 font-medium text-sm rounded-lg mt-6 relative flex items-center justify-center"
           disabled={loading}
+          className={`w-full py-2 rounded-lg font-medium text-white transition ${
+            loading ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+          }`}
+          whileHover={{ scale: !loading ? 1.05 : 1 }}
+          whileTap={{ scale: !loading ? 0.95 : 1 }}
         >
-          {loading ? (
-            <Oval
-              visible={true}
-              height="20"
-              width="20"
-              color="#fff"
-              ariaLabel="oval-loading"
-            />
-          ) : (
-            "Submit"
-          )}
-        </button>
-
-        {/* Message after upload */}
-        {message && (
-          <p
-            className={`mt-4 text-sm ${
-              message.includes("Error") ? "text-red-500" : "text-green-500"
-            }`}
-          >
-            {message}
-          </p>
-        )}
-      </div>
+          {loading ? <Oval height={20} width={20} color="#fff" /> : "Submit"}
+        </motion.button>
+      </motion.div>
     </div>
   );
 };

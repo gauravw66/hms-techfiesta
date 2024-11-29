@@ -21,7 +21,7 @@ const UserDashboard = () => {
   };
 
   if (redirectToLogin) {
-    return <Navigate to="/" />; // Redirect to the login page
+    return <Navigate to="/login" />; // Redirect to the login page
   }
 
   return (

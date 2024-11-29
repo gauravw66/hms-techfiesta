@@ -27,7 +27,7 @@ const TempNavbar = () => {
             <ul className="space-y-2 md:space-y-0 md:flex">
               <li>
                 <Link
-                  to="/"
+                  to="/login"
                   className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
                   onClick={() => setIsOpen(false)}
                 >
