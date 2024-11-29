@@ -69,38 +69,59 @@ const UploadDocuments = () => {
     showSuccessToast("File removed successfully.");
   };
 
+  const uploadToPinata = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+        headers: {
+          pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+          pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_API_KEY,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
+    } catch (error) {
+      throw new Error("Error uploading to Pinata: " + error.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const hasFiles = Object.values(files).some((section) => section.length > 0);
     if (!hasFiles) {
       const errorMessage = "Please upload at least one document.";
       showErrorToast(errorMessage);
       return;
     }
-
+  
     setLoading(true);
-
-    const formData = new FormData();
-    Object.entries(files).forEach(([section, sectionFiles]) => {
-      sectionFiles.forEach((file, index) => {
-        formData.append(`${section}[${index}]`, file);
-      });
-    });
-
+  
     try {
-      const response = await axios.post("http://localhost:5000/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      showSuccessToast("Files uploaded successfully!");
-      setFiles({ imaging: [], lab: [], surgery: [], medication: [] });
+      const uploadedLinks = {};
+  
+      for (const [section, sectionFiles] of Object.entries(files)) {
+        uploadedLinks[section] = []; // Initialize an empty array for each section
+  
+        for (const file of sectionFiles) {
+          const uploadedLink = await uploadToPinata(file); // Upload file to Pinata
+          uploadedLinks[section].push(uploadedLink); // Add uploaded file link to the section
+        }
+      }
+  
+      console.log("Uploaded Files JSON:", JSON.stringify(uploadedLinks, null, 2)); // Log JSON object of links
+      showSuccessToast("All files uploaded successfully to Pinata!");
+  
+      setFiles({ imaging: [], lab: [], surgery: [], medication: [] }); // Reset files
     } catch (error) {
-      const errorMessage = `Error uploading files: ${error.message}`;
-      showErrorToast(errorMessage);
+      showErrorToast(error.message);
     } finally {
       setLoading(false);
     }
   };
+  
 
   const sections = [
     { title: "Imaging Documents", key: "imaging" },
@@ -129,9 +150,7 @@ const UploadDocuments = () => {
             transition={{ duration: 0.4, delay: 0.1 }}
           >
             <p className="font-medium text-gray-700">{section.title}</p>
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-4 mt-2 transition hover:bg-gray-100 cursor-pointer"
-            >
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mt-2 transition hover:bg-gray-100 cursor-pointer">
               <input
                 type="file"
                 accept=".pdf"
