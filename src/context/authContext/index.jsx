@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { auth } from "../../firebase/firebase";
+import { auth } from "../../firebase/firebase"; // Your Firebase setup
 import { onAuthStateChanged } from "firebase/auth";
 
 const AuthContext = React.createContext();
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading ? children : <div>Loading...</div>}
+      {!loading ? children : <div>Loading...</div>} {/* Show loading spinner while checking auth state */}
     </AuthContext.Provider>
   );
 }
