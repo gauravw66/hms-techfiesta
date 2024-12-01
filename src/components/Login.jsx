@@ -6,7 +6,7 @@ import {
   doSignInWithGoogle,
 } from "../firebase/auth";
 import { useAuth } from "../context/authContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
   const { userLoggedIn } = useAuth();
@@ -17,12 +17,15 @@ const Login = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!isSigningIn) {
       setIsSigningIn(true);
       try {
         await doSignInWithEmailAndPassword(email, password);
+        navigate("/personal-info");
       } catch (error) {
         setError(error.message);
       } finally {
@@ -37,6 +40,7 @@ const Login = () => {
       setIsSigningIn(true);
       try {
         await doSignInWithGoogle();
+        navigate("/personal-info");
       } catch (error) {
         setError(error.message);
       } finally {
@@ -51,7 +55,7 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 md:px-4 md:p-2">
-      {userLoggedIn && <Navigate to="/user-dashboard" replace={true} />}
+      {userLoggedIn && <Navigate to="/personal-info" replace={true} />}
       <div className="w-full max-w-md md:bg-white md:shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold text-center text-gray-900">
           Welcome Back!

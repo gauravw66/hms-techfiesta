@@ -16,10 +16,7 @@ if (!uri) {
 
 async function connectToDatabase() {
   try {
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
     console.log("Connected to MongoDB with Mongoose");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error);
