@@ -8,8 +8,13 @@ const app = express();
 
 // Middleware to parse JSON
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/addDummyPatient", require("./routers/addPatientRouter"));
+// user routes
+app.use("/api/user", require("./routes/userRoutes"));
+
+// admin routes
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 // Start the server
 const PORT = process.env.PORT;
