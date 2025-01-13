@@ -1,32 +1,32 @@
-# Ignore node_modules in both Backend and Frontend directories
-/Backend/node_modules/
+# Ignore node_modules in both backend and Frontend directories
+/backend/node_modules/
 /Frontend/node_modules/
 
-# Ignore .env files in both Backend and Frontend directories
+# Ignore .env files in both backend and Frontend directories
 /backend/.env
 /Frontend/.env
 
 # Ignore log files
 *.log
-/Backend/*.log
+/backend/*.log
 /Frontend/*.log
 
 # Ignore package-lock.json or yarn.lock files if you don’t want them tracked
-/Backend/package-lock.json
+/backend/package-lock.json
 /Frontend/package-lock.json
-/Backend/yarn.lock
+/backend/yarn.lock
 /Frontend/yarn.lock
 
 # Ignore debug, temp, and cache directories
-/Backend/debug/
+/backend/debug/
 /Frontend/debug/
-/Backend/temp/
+/backend/temp/
 /Frontend/temp/
-/Backend/cache/
+/backend/cache/
 /Frontend/cache/
-/Backend/.cache/
+/backend/.cache/
 /Frontend/.cache/
-/Backend/.npm/
+/backend/.npm/
 /Frontend/.npm/
 
 /# Ignore IDE and editor files (VSCode, WebStorm, etc.)
@@ -38,9 +38,9 @@
 Thumbs.db
 
 # Ignore build or dist folders
-/Backend/dist/
+/backend/dist/
 /Frontend/dist/
-/Backend/build/
+/backend/build/
 /Frontend/build/
 
 # Ignore .env files for other environments (e.g., .env.production, .env.local)
