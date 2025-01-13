@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/login";
-import Signup from "./components/signup";
+import Signup from "./components/Signup";
 import PersonalInfoForm from "./components/PersonalInfoForm";
 import MedicalHistoryForm from "./components/MedicalHistoryForm";
 import MedicalHistoryForm2 from "./components/MedicalHistoryForm2";
@@ -9,6 +9,8 @@ import UserDashboard from "./components/UserDashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import TempNavbar from "./components/TempNavbar";
 import ProtectedRoute from "./components/ProtectedRoute";
+import HospitalAdmin from "./components/HospitalAdmin";
+
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
 
         {/* Protected routes */}
         {/* <Route element={<ProtectedRoute />}> */}
+        <Route path="/hospital-admin" element={<HospitalAdmin />} />
           <Route path="/personal-info" element={<PersonalInfoForm />} />
           <Route path="/medical-history" element={<MedicalHistoryForm />} />
           <Route path="/medical-history-2" element={<MedicalHistoryForm2 />} />
