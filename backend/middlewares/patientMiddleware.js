@@ -13,7 +13,7 @@ const isAuthenticated = async (req, res, next) => {
 
     const token = authHeader.replace("Bearer ", "");
     const tokenQueryParams = [token];
-    const tokenQuery = `SELECT * FROM user_token WHERE token = $1`;
+    const tokenQuery = `SELECT * FROM patient_token WHERE token = $1`;
     const tokenQueryData = await pool.query(tokenQuery, tokenQueryParams);
 
     if (tokenQueryData.rowCount < 1) {
@@ -21,7 +21,7 @@ const isAuthenticated = async (req, res, next) => {
     }
 
     const userId = tokenQueryData.rows[0].fk_user;
-    const userQuery = `SELECT id FROM users WHERE id = $1`;
+    const userQuery = `SELECT id FROM patient WHERE id = $1`;
     const userQueryParams = [userId];
     const userQueryData = await pool.query(userQuery, userQueryParams);
 

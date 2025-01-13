@@ -6,12 +6,15 @@ dotenv.config();
 // Initialize Express app
 const app = express();
 
+const { v4: uuidv4 } = require("uuid");
+console.log(uuidv4());
+
 // Middleware to parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// user routes
-app.use("/api/user", require("./routes/userRoutes"));
+// patient routes
+app.use("/api/patient", require("./routes/patientRoutes"));
 
 // admin routes
 app.use("/api/admin", require("./routes/adminRoutes"));
