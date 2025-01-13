@@ -4,7 +4,10 @@ const {
   personalInfo,
   medicalInfo1,
   medicalInfo2,
+  signup,
 } = require("../controllers/userControllers");
+
+router.get("/signup", signup);
 
 // post personal info
 router.post("/personalInfo", personalInfo);
